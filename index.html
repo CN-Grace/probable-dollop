@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>✨ My Gallery</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Noto+Serif+SC:wght@300;400;600&display=swap');
+
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 25%, #f3e8ff 50%, #ede9fe 75%, #fdf2f8 100%);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+      font-family: 'Noto Serif SC', 'Playfair Display', Georgia, serif;
+      overflow: hidden;
+      position: relative;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Floating decorative elements */
+    .floating-decor {
+      position: fixed;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .floating-decor .circle {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.15;
+      animation: float 20s ease-in-out infinite;
+    }
+
+    .floating-decor .circle:nth-child(1) {
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, #f9a8d4, transparent);
+      top: -100px;
+      left: -50px;
+      animation-delay: 0s;
+    }
+
+    .floating-decor .circle:nth-child(2) {
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, #c4b5fd, transparent);
+      top: 50%;
+      right: -80px;
+      animation-delay: -5s;
+    }
+
+    .floating-decor .circle:nth-child(3) {
+      width: 250px;
+      height: 250px;
+      background: radial-gradient(circle, #fda4af, transparent);
+      bottom: -80px;
+      left: 30%;
+      animation-delay: -10s;
+    }
+
+    .floating-decor .circle:nth-child(4) {
+      width: 180px;
+      height: 180px;
+      background: radial-gradient(circle, #a78bfa, transparent);
+      top: 20%;
+      left: 60%;
+      animation-delay: -15s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      25% { transform: translate(30px, -20px) scale(1.05); }
+      50% { transform: translate(-20px, 30px) scale(0.95); }
+      75% { transform: translate(20px, 20px) scale(1.02); }
+    }
+
+    /* Sparkle particles */
+    .sparkles {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .sparkle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: #f9a8d4;
+      border-radius: 50%;
+      animation: sparkle 4s ease-in-out infinite;
+      opacity: 0;
+    }
+
+    @keyframes sparkle {
+      0%, 100% { opacity: 0; transform: scale(0) translateY(0); }
+      50% { opacity: 0.8; transform: scale(1) translateY(-20px); }
+    }
+
+    /* Main container */
+    .gallery-container {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+      padding: 2rem;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    /* Title */
+    .gallery-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 600;
+      color: #831843;
+      text-align: center;
+      letter-spacing: 0.05em;
+      opacity: 0;
+      animation: fadeInDown 1s ease 0.3s forwards;
+    }
+
+    .gallery-title span {
+      display: inline-block;
+      background: linear-gradient(135deg, #be185d, #7c3aed);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Photo frame */
+    .photo-frame {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow:
+        0 25px 60px rgba(190, 24, 93, 0.15),
+        0 10px 30px rgba(124, 58, 237, 0.1),
+        0 0 0 1px rgba(255, 255, 255, 0.5);
+      background: white;
+      padding: 12px;
+      opacity: 0;
+      animation: fadeInUp 1s ease 0.6s forwards;
+    }
+
+    .photo-frame::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 24px;
+      padding: 2px;
+      background: linear-gradient(135deg, #f9a8d4, #c4b5fd, #f9a8d4);
+      background-size: 200% 200%;
+      animation: borderGlow 4s ease infinite;
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    @keyframes borderGlow {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .photo-wrapper {
+      position: relative;
+      width: 100%;
+      border-radius: 16px;
+      overflow: hidden;
+      aspect-ratio: 3 / 4;
+      background: linear-gradient(135deg, #fdf2f8, #fce7f3);
+    }
+
+    .photo-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      border-radius: 16px;
+      transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1), transform 8s ease;
+      transform: scale(1);
+    }
+
+    .photo-wrapper img.active {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+
+    .photo-wrapper img.fade-out {
+      opacity: 0;
+    }
+
+    .photo-wrapper img.fade-in {
+      opacity: 0;
+    }
+
+    /* Slideshow images stacked */
+    .photo-wrapper img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      opacity: 0;
+    }
+
+    .photo-wrapper img:first-child {
+      opacity: 1;
+    }
+
+    /* Navigation dots */
+    .nav-dots {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      opacity: 0;
+      animation: fadeInUp 1s ease 0.9s forwards;
+    }
+
+    .nav-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(190, 24, 93, 0.2);
+      border: none;
+      cursor: pointer;
+      transition: all 0.4s ease;
+      padding: 0;
+    }
+
+    .nav-dot.active {
+      background: linear-gradient(135deg, #ec4899, #a855f7);
+      transform: scale(1.3);
+      box-shadow: 0 0 12px rgba(236, 72, 153, 0.4);
+    }
+
+    .nav-dot:hover {
+      background: rgba(190, 24, 93, 0.5);
+      transform: scale(1.2);
+    }
+
+    /* Progress bar */
+    .progress-bar {
+      width: 100%;
+      max-width: 420px;
+      height: 3px;
+      background: rgba(190, 24, 93, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
+      opacity: 0;
+      animation: fadeInUp 1s ease 1s forwards;
+    }
+
+    .progress-bar .progress {
+      height: 100%;
+      background: linear-gradient(90deg, #ec4899, #a855f7);
+      border-radius: 2px;
+      width: 0%;
+      animation: progress 5s linear infinite;
+    }
+
+    @keyframes progress {
+      from { width: 0%; }
+      to { width: 100%; }
+    }
+
+    /* Footer */
+    .gallery-footer {
+      font-size: 0.85rem;
+      color: #9d174d;
+      opacity: 0;
+      animation: fadeInUp 1s ease 1.2s forwards;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .gallery-container {
+        padding: 1rem;
+        gap: 1.5rem;
+      }
+
+      .gallery-title {
+        font-size: 1.5rem;
+      }
+
+      .photo-frame {
+        padding: 8px;
+        border-radius: 20px;
+      }
+
+      .photo-wrapper {
+        border-radius: 14px;
+      }
+    }
+
+    /* Touch/hover effect on photo */
+    .photo-frame:hover {
+      box-shadow:
+        0 30px 70px rgba(190, 24, 93, 0.2),
+        0 15px 40px rgba(124, 58, 237, 0.15),
+        0 0 0 1px rgba(255, 255, 255, 0.6);
+      transition: box-shadow 0.5s ease;
+    }
+
+    /* Loading state */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(236, 72, 153, 0.2);
+      border-top-color: #ec4899;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Decorative floating elements -->
+  <div class="floating-decor">
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+  </div>
+
+  <!-- Sparkle particles -->
+  <div class="sparkles" id="sparkles"></div>
+
+  <!-- Main gallery -->
+  <div class="gallery-container">
+    <h1 class="gallery-title"><span>✨ My Gallery ✨</span></h1>
+
+    <div class="photo-frame">
+      <div class="photo-wrapper" id="photoWrapper">
+        <div class="loading" id="loading">
+          <div class="loading-spinner"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-dots" id="navDots"></div>
+
+    <div class="progress-bar">
+      <div class="progress" id="progressBar"></div>
+    </div>
+
+    <p class="gallery-footer">☁ Beauty in every moment ☁</p>
+  </div>
+
+  <script>
+    // Photo list in /pic directory
+    const photos = [
+      'pic/1.jpg'
+    ];
+
+    const INTERVAL = 5000; // 5 seconds per photo
+    let currentIndex = 0;
+    let timer = null;
+    let progressTimer = null;
+
+    const photoWrapper = document.getElementById('photoWrapper');
+    const navDotsContainer = document.getElementById('navDots');
+    const progressBar = document.getElementById('progressBar');
+    const loading = document.getElementById('loading');
+
+    // Create sparkle particles
+    function createSparkles() {
+      const container = document.getElementById('sparkles');
+      for (let i = 0; i < 20; i++) {
+        const sparkle = document.createElement('div');
+        sparkle.className = 'sparkle';
+        sparkle.style.left = Math.random() * 100 + '%';
+        sparkle.style.top = Math.random() * 100 + '%';
+        sparkle.style.animationDelay = Math.random() * 4 + 's';
+        sparkle.style.animationDuration = (3 + Math.random() * 3) + 's';
+        sparkle.style.background = ['#f9a8d4', '#c4b5fd', '#fda4af', '#a78bfa'][Math.floor(Math.random() * 4)];
+        sparkle.style.width = (2 + Math.random() * 4) + 'px';
+        sparkle.style.height = sparkle.style.width;
+        container.appendChild(sparkle);
+      }
+    }
+
+    // Preload images
+    function preloadImages() {
+      const promises = photos.map((src, index) => {
+        return new Promise((resolve) => {
+          const img = document.createElement('img');
+          img.src = src;
+          img.alt = 'Photo ' + (index + 1);
+          img.draggable = false;
+
+          img.onload = () => {
+            photoWrapper.appendChild(img);
+            if (index === 0) {
+              img.classList.add('active');
+              img.style.opacity = '1';
+            }
+            resolve();
+          };
+
+          img.onerror = () => {
+            resolve();
+          };
+        });
+      });
+
+      Promise.all(promises).then(() => {
+        if (loading) loading.style.display = 'none';
+        createNavDots();
+        startSlideshow();
+      });
+    }
+
+    // Create navigation dots
+    function createNavDots() {
+      if (photos.length <= 1) {
+        navDotsContainer.style.display = 'none';
+        return;
+      }
+
+      photos.forEach((_, index) => {
+        const dot = document.createElement('button');
+        dot.className = 'nav-dot' + (index === 0 ? ' active' : '');
+        dot.setAttribute('aria-label', 'Go to photo ' + (index + 1));
+        dot.addEventListener('click', () => goToSlide(index));
+        navDotsContainer.appendChild(dot);
+      });
+    }
+
+    // Update active dot
+    function updateDots() {
+      const dots = navDotsContainer.querySelectorAll('.nav-dot');
+      dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === currentIndex);
+      });
+    }
+
+    // Transition to specific slide
+    function goToSlide(index) {
+      if (index === currentIndex) return;
+
+      const images = photoWrapper.querySelectorAll('img');
+      if (images.length === 0) return;
+
+      // Fade out current
+      images[currentIndex].style.opacity = '0';
+      images[currentIndex].style.transform = 'scale(1)';
+      images[currentIndex].classList.remove('active');
+
+      // Fade in next
+      currentIndex = index;
+      images[currentIndex].style.opacity = '1';
+      images[currentIndex].style.transform = 'scale(1)';
+      images[currentIndex].classList.add('active');
+
+      updateDots();
+      resetProgress();
+    }
+
+    // Next slide
+    function nextSlide() {
+      const nextIndex = (currentIndex + 1) % photos.length;
+      goToSlide(nextIndex);
+    }
+
+    // Reset progress bar
+    function resetProgress() {
+      progressBar.style.animation = 'none';
+      progressBar.offsetHeight; // Trigger reflow
+      progressBar.style.animation = 'progress ' + (INTERVAL / 1000) + 's linear infinite';
+    }
+
+    // Start slideshow
+    function startSlideshow() {
+      if (photos.length <= 1) {
+        // Even with 1 photo, show the gentle zoom animation
+        const images = photoWrapper.querySelectorAll('img');
+        if (images.length > 0) {
+          images[0].classList.add('active');
+        }
+        progressBar.parentElement.style.display = 'none';
+        return;
+      }
+
+      resetProgress();
+      timer = setInterval(nextSlide, INTERVAL);
+    }
+
+    // Touch/swipe support
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    photoWrapper.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    photoWrapper.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    }, { passive: true });
+
+    function handleSwipe() {
+      const diff = touchStartX - touchEndX;
+      if (Math.abs(diff) > 50) {
+        clearInterval(timer);
+        if (diff > 0) {
+          nextSlide();
+        } else {
+          const prevIndex = (currentIndex - 1 + photos.length) % photos.length;
+          goToSlide(prevIndex);
+        }
+        timer = setInterval(nextSlide, INTERVAL);
+      }
+    }
+
+    // Initialize
+    createSparkles();
+    preloadImages();
+  </script>
+</body>
+</html>
